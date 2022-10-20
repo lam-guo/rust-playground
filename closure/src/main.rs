@@ -1,6 +1,6 @@
 fn main() {
     clo(|| {
-        go; // 这里只会warn
+        go; // 这里只会warn，不会执行，path statement with no effect(无效声明)
     });
     clo(|| {
         go();
