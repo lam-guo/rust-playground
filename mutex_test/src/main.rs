@@ -18,6 +18,6 @@ fn dead_lock() {
     let mut m = b.lock().unwrap();
     *m = 7;
     println!("{:?}", m);
-    // drop(m);
+    // drop(m); //不注释可以打印b的值，不drop会导致b的值被locked，打印出：Mutex { data: <locked>, poisoned: false, .. }
     println!("{:?}", b);
 }
