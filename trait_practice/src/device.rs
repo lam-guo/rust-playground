@@ -17,3 +17,17 @@ impl Device for Switch{
         println!("processor!")
     }
 }
+
+pub struct Light {}
+
+impl Device for Light{
+    fn mqtt_handler(&mut self) {
+        println!("mqtt:light!")
+    }
+    fn device_handler(&mut self) {
+        println!("device:light!")
+    }
+    fn processor(&mut self) {
+        println!("processor!:light")
+    }
+}

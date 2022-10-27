@@ -4,8 +4,10 @@ mod device;
 fn main() {
     let s = Switch::from((1, 1));
     println!("{:?}", s);
-    let g = device::Switch{};
-    test_trait(g);
+    let switch = device::Switch{};
+    test_trait(switch);
+    let light = device::Light{};
+    test_trait(light);
 }
 
 #[derive(Serialize, Deserialize, Debug)]
