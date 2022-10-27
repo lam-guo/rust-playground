@@ -1,10 +1,12 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+mod device;
 
 fn main() {
-    let s =Switch::from((1,1));
-    println!("{:?}",s);
+    let s = Switch::from((1, 1));
+    println!("{:?}", s);
+    let g = device::Switch{};
+    test_trait(g);
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Switch {
@@ -19,7 +21,7 @@ struct ResultCmdList {
 }
 
 impl From<(u8, u8)> for Switch {
-    fn from((channel,status_int): (u8, u8)) -> Self {
+    fn from((channel, status_int): (u8, u8)) -> Self {
         Self {
             channel,
             status: match status_int {
@@ -28,4 +30,10 @@ impl From<(u8, u8)> for Switch {
             },
         }
     }
+}
+
+fn test_trait(mut c: impl device::Device) {
+    c.processor();
+    c.mqtt_handler();
+    c.device_handler();
 }
