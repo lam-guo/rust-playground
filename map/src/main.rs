@@ -14,6 +14,12 @@ fn main() {
             min = k;
         }
     }
+    // 如果用iter就不会有转移所有权问题，iter是引用
+    for (k, _) in map.iter() {
+        if *k < min {
+            min = *k;
+        }
+    }
     println!("{:?}", min);
     println!("{:?}", map);
     println!("{:?}", map.capacity());
