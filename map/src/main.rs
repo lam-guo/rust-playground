@@ -24,4 +24,19 @@ fn main() {
     println!("{:?}", map);
     println!("{:?}", map.capacity());
     println!("{:?}", map.len());
+
+    let mut vec: Vec<&str> = vec![""; 5];
+    println!("{:?}", vec);
+    for (_, v) in map.iter() {
+        vec.push(*v);
+    }
+    println!("{:?}", vec);
+    let mut arr = [""; 5];
+    println!("{:?}", arr);
+    let mut i = 0;
+    for (_, v) in map.iter() {
+        arr[i as usize] = *v;
+        i += 1;
+    }
+    println!("{:?}", arr);
 }
