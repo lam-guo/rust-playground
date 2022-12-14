@@ -8,4 +8,10 @@ fn main() {
     // 这样不行，会提示does not have a constant size known at compile-time。详见https://stackoverflow.com/questions/49393462/what-does-str-does-not-have-a-constant-size-known-at-compile-time-mean-and
     // println!("{:?}", b[2..4]);
     println!("{:?}", &b[2..4]);
+
+    let c = 3;
+    // 0..c是左开右闭，就是0到2
+    for i in 0..c {
+        println!("{}", i);
+    }
 }
