@@ -29,6 +29,14 @@ fn main() {
     };
     job_list.list.push(j2);
     job_list.run();
+
+    let mut d = Device {
+        jobs: vec![],
+        val: 0,
+    };
+    d.add_job_a();
+    d.add_job_b();
+    d.exec()
 }
 
 fn closure() {
@@ -65,6 +73,52 @@ impl JobList {
             if i.time <= Local::now().timestamp() {
                 i.func.clone()();
             }
+        }
+    }
+}
+
+struct JobFn {
+    pub time: i64,
+    pub func: Box<dyn Fn(&mut Device)>, // 因为Fn无法确定size，用box包装
+}
+
+struct Device {
+    jobs: Vec<JobFn>,
+    val: u8,
+}
+
+impl Device {
+    fn add_job_a(&mut self) {
+        let a = &self;
+        let new_job = JobFn {
+            time: 1,
+            func: Box::new(|a| a.task_a()),
+        };
+        self.jobs.push(new_job);
+    }
+
+    fn add_job_b(&mut self) {
+        let a = &self;
+        let new_job = JobFn {
+            time: 1,
+            func: Box::new(|a| a.task_b()),
+        };
+        self.jobs.push(new_job);
+    }
+
+    fn task_a(&mut self) {
+        println!("这是任务a，{:?}", self.val)
+    }
+
+    fn task_b(&mut self) {
+        println!("这是任务b，{:?}", self.val)
+    }
+
+    fn exec(&mut self) {
+        for i in self.jobs.iter_mut() {
+            let a = i.func.as_ref();
+            // TODO need help，怎么实现？
+            // a(self)
         }
     }
 }
