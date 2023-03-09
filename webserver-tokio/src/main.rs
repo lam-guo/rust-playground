@@ -1,11 +1,15 @@
+use crate::cmd::command::ls;
 use std::fs;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::{TcpListener, TcpStream},
 };
 
+mod cmd;
+
 #[tokio::main]
 async fn main() {
+    ls().await;
     let listener = TcpListener::bind("0.0.0.0:8888").await.unwrap();
     loop {
         let (stream, _) = listener.accept().await.unwrap();
