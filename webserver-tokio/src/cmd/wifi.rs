@@ -221,12 +221,20 @@ pub async fn kill_sta() {
     println!("{:?}", output);
 }
 
-pub async fn wifi_status() -> u8 {
-    let output = Command::new("wpa_cli")
-        .args(["status"])
-        .output()
-        .await
-        .expect("failed to get wpa_cli status");
-    println!("{:?}", output);
-    return 0;
+pub async fn wifi_status() {
+    let mut command = Command::new("wpa_cli");
+    command.arg("status");
+    command.stdout(Stdio::piped());
+    let mut child = command.spawn().unwrap();
+    let stdout = child
+        .stdout
+        .take()
+        .expect("child did not have a handle to stdout");
+    let mut reader = bf::new(stdout).lines();
+    while let Some(l) = reader.next_line().await.unwrap() {
+        if l.contains("wpa_state=") {
+            let v: Vec<_> = l.split("=").collect();
+            // TODO 数据在这里
+        }
+    }
 }
