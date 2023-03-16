@@ -3,6 +3,7 @@ use tera::{Context, Tera};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::process::{Child, Stdio};
+use tokio::fs::File as tokio_file;
 use tokio::io::BufReader as bf;
 use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
@@ -48,6 +49,23 @@ fn read_wpa() {
                     for i in v {
                         println!("{:?}", i);
                     }
+                }
+            }
+        }
+        Err(e) => {
+            println!("open error:{:?}", e)
+        }
+    }
+}
+
+async fn tokio_read_file() {
+    match tokio_file::open("wpa.conf").await {
+        Ok(f) => {
+            let mut reader = bf::new(f).lines();
+            while let Some(l) = reader.next_line().await.unwrap() {
+                if l.contains("ssid=") {
+                    let v: Vec<_> = l.split("=").collect();
+                    v[1]
                 }
             }
         }
