@@ -7,6 +7,7 @@ use tokio::{
 };
 
 mod cmd;
+mod svc;
 
 // #[tokio::main]
 // async fn main() {
@@ -35,7 +36,7 @@ mod cmd;
 
 #[tokio::main]
 async fn main() {
-    let _ = HttpServer::new(|| App::new().service(greet))
+    let _ = HttpServer::new(|| App::new().service(greet).service(svc::service::init()))
         .bind(("0.0.0.0", 8888))
         .expect("msg")
         .run()
