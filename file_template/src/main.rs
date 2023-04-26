@@ -2,11 +2,10 @@ use tera::{Context, Tera};
 
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::process::{Child, Stdio};
+use std::process::Stdio;
 use tokio::fs::File as tokio_file;
+use tokio::io::AsyncBufReadExt;
 use tokio::io::BufReader as bf;
-use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt};
-use tokio::net::{TcpListener, TcpStream};
 use tokio::process::Command;
 
 #[tokio::main]
@@ -63,10 +62,7 @@ async fn tokio_read_file() {
         Ok(f) => {
             let mut reader = bf::new(f).lines();
             while let Some(l) = reader.next_line().await.unwrap() {
-                if l.contains("ssid=") {
-                    let v: Vec<_> = l.split("=").collect();
-                    v[1]
-                }
+                //TODO 读写逻辑
             }
         }
         Err(e) => {

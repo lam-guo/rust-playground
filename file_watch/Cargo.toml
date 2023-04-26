@@ -6,4 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.70"
+chrono = "0.4.24"
+gpio = "0.4.1"
 inotify = "0.10.0"
+log = "0.4.17"
+tokio = { version = "1", features = ["full"] }
