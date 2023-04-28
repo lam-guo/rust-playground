@@ -12,8 +12,9 @@ use tokio::sync::mpsc::Sender;
 
 const BUTTON_FILE: &str = "t.txt";
 const LONG_PRESS_DURATION: i64 = 8;
+const OVER_LONG_PRESS_DURATION: i64 = 15;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 enum ButtonState {
     Up = 0,
     Down = 1,
@@ -28,46 +29,76 @@ async fn main() {
         .unwrap();
     let (btn_rx, mut btn_tx) = tokio::sync::mpsc::channel::<ButtonState>(1);
     rt.spawn(async move {
-        let mut last_up = Local::now().timestamp();
-        let mut last_down = Local::now().timestamp();
+        let mut last_down = 0;
         let mut ticker = tokio::time::interval(Duration::from_secs(1));
-        let mut state = ButtonState::Up;
-        let mut long_block = tokio::sync::Mutex::new(false);
+        let long_press_block = tokio::sync::Mutex::new(false);
+        let over_long_press_block = tokio::sync::Mutex::new(false);
+        let mut cur_state = ButtonState::Up;
         loop {
             tokio::select! {
                 button_msg = btn_tx.recv() => {
-                    if let Some(s) = button_msg {
-                        state = s;
+                    if let Some(state) = button_msg {
                         match state{
                             ButtonState::Up => {
-                                last_up = Local::now().timestamp();
-                                if last_up - last_down >LONG_PRESS_DURATION {
-                                    //这就是长按
-                                    let mut  block = long_block.lock().await;
+                                cur_state = ButtonState::Up;
+                                let now = Local::now().timestamp();
+                                if now - last_down > LONG_PRESS_DURATION && now -last_down <OVER_LONG_PRESS_DURATION{
+                                    let mut  block = long_press_block.lock().await;
                                     if !*block {
-                                        println!("长按松开");
+                                        // 这里做一层保障，避免tick错过判断
+                                        // TODO 长按逻辑
+                                        println!("长按-1");
                                     }
                                     *block = false;
-                                }else {
-                                    //这是短按
+                                }else if now - last_down > OVER_LONG_PRESS_DURATION {
+                                    let mut  block = long_press_block.lock().await;
+                                    *block = false;
+                                    drop(block);
+                                    let mut o_block = over_long_press_block.lock().await;
+                                    if !*o_block {
+                                        // 这里做一层保障，避免tick错过判断
+                                        // TODO 超长按逻辑
+                                        println!("超长按-1");
+                                    }
+                                    *o_block = false;
+                                } else {
+                                    // 短按
                                 }
                             },
                             ButtonState::Down => {
                                 last_down = Local::now().timestamp();
+                                cur_state = ButtonState::Down;
                             },
                         }
                     }else {
-                        println!("not in?")
+                        info!("btn_tx recv None");
                     }
                 }
                 _= ticker.tick() =>{
                     //判断下相隔时间，避免出现一直按住的情况
-                    let mut block = long_block.lock().await;
-                    if last_up - last_down > LONG_PRESS_DURATION && !*block {
-                        //  这就是长按
-                        *block = true;
-                        println!("长按没松开");
+                    if cur_state == ButtonState::Up{
+                        continue;
                     }
+                    let now = Local::now().timestamp();
+                    if now -last_down > OVER_LONG_PRESS_DURATION {
+                        let mut block = over_long_press_block.lock().await;
+                        if *block {
+                            continue;
+                        }
+                        *block = true;
+                        // TODO 超长按逻辑
+                        println!("超长按")
+                    }
+                    if now - last_down> LONG_PRESS_DURATION {
+                        let mut block = long_press_block.lock().await;
+                        if *block {
+                            continue;
+                        }
+                        *block = true;
+                        // TOOD长按逻辑
+                        println!("长按");
+                    }
+                    
                 }
 
             }
@@ -81,7 +112,6 @@ async fn main() {
 
         rt.block_on(async move {
             let r = watch_file(PathBuf::from("/home/test/"), BUTTON_FILE, btn_rx.clone()).await;
-            println!("watch_file result:{:?}", r);
         });
     });
 
@@ -124,14 +154,8 @@ async fn watch_file(
                         file.read_to_string(&mut buffer)?;
                         let content = buffer.trim();
                         if let Err(e) = match content {
-                            "0" => {
-                                println!("is 0");
-                                rx.send(ButtonState::Up).await
-                            }
-                            _ => {
-                                println!("is 1");
-                                rx.send(ButtonState::Down).await
-                            }
+                            "0" => rx.send(ButtonState::Up).await,
+                            _ => rx.send(ButtonState::Down).await,
                         } {
                             println!("watch file rx send error:{:?}", e);
                             return Ok(());
