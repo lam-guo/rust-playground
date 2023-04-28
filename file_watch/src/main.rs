@@ -166,3 +166,23 @@ async fn watch_file(
         }
     }
 }
+
+// TODO 用这个得了
+// async fn get_btn_state(pin_num: u64, rx: Sender<ButtonState>) -> sysfs_gpio::Result<()> {
+//     let input = Pin::new(pin_num);
+//     input.export()?;
+//     input.set_direction(Direction::In)?;
+//     let mut prev_val: u8 = 1;
+//     loop {
+//         let val = input.get_value()?;
+//         if val != prev_val {
+//             if val == 0 {
+//                 let _ = rx.send(ButtonState::Down).await;
+//             } else {
+//                 let _ = rx.send(ButtonState::Up).await;
+//             }
+//             prev_val = val;
+//         }
+//         thread::sleep(Duration::from_millis(10));
+//     }
+// }
