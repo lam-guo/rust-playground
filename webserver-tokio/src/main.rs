@@ -34,13 +34,26 @@ mod svc;
 //     stream.write_all(response.as_bytes()).await.unwrap();
 // }
 
-#[tokio::main]
-async fn main() {
-    let _ = HttpServer::new(|| App::new().service(greet).service(svc::service::init()))
-        .bind(("0.0.0.0", 8888))
-        .expect("msg")
-        .run()
-        .await;
+fn main() {
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .worker_threads(4)
+        .build()
+        .unwrap();
+    rt.spawn(async move {
+        let srv = HttpServer::new(|| App::new().service(greet).service(svc::service::init()))
+            .bind(("0.0.0.0", 9999))
+            .expect("msg")
+            .run();
+        srv.await.unwrap();
+    });
+    rt.block_on(async {
+        let _ = HttpServer::new(|| App::new().service(greet).service(svc::service::init()))
+            .bind(("0.0.0.0", 8888))
+            .unwrap()
+            .run()
+            .await;
+    });
 }
 
 #[get("/hello/{name}")]
