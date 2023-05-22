@@ -32,11 +32,19 @@ fn iter_map() {
     let mut b = a.iter().map(|x| {
         let c = x * 2;
         total += c;
+        println!("{x}");
         c
     });
     while b.next().is_some() {
         println!("{:?}", b.next(),);
     }
-    // 这里输出20，是10的2倍
     println!("{}", total);
 }
+/* 总的输出如下1
+2
+Some(4)
+3
+4
+Some(8)
+20
+*/
