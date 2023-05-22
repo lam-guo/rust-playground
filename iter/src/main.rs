@@ -40,7 +40,8 @@ fn iter_map() {
     }
     println!("{}", total);
 }
-/* 总的输出如下1
+/* 总的输出如下
+1
 2
 Some(4)
 3
