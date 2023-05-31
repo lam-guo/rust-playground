@@ -21,9 +21,9 @@ async fn main() {
             //     next_record_at = Instant::now().add(Duration::from_secs(4));
             //     println!("inside a------------------------");
             // }
-            _ =b() =>{
-                println!("inside b------------------------");
-            }
+            // _ =b() =>{
+            //     println!("inside b------------------------");
+            // }
         }
     }
 }

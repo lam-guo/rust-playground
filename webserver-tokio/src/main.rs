@@ -7,6 +7,7 @@ use tokio::{
 };
 
 mod cmd;
+mod middleware;
 mod svc;
 
 // #[tokio::main]
@@ -42,10 +43,15 @@ fn main() {
         .build()
         .unwrap();
     rt.spawn(async move {
-        let srv = HttpServer::new(|| App::new().service(greet).service(svc::service::init()))
-            .bind(("0.0.0.0", 9999))
-            .expect("msg")
-            .run();
+        let srv = HttpServer::new(|| {
+            App::new()
+                .wrap(middleware::auth::AuthService {}) //中间件
+                .service(greet)
+                .service(svc::service::init())
+        })
+        .bind(("0.0.0.0", 9999))
+        .expect("msg")
+        .run();
         srv.await.unwrap();
     });
     rt.block_on(async {
