@@ -4,8 +4,19 @@ use tokio::time::{self, Instant};
 
 #[tokio::main]
 async fn main() {
-    let mut next_record_at = Instant::now().add(Duration::from_secs(20));
+    // timer().await
+    race().await
+}
 
+async fn race() {
+    tokio::select! {
+        _=a()=>{}
+        _=b()=>{}
+    }
+}
+
+async fn timer() {
+    let mut next_record_at = Instant::now().add(Duration::from_secs(20));
     loop {
         tokio::select! {
             _ = time::sleep_until(next_record_at) => {
@@ -21,13 +32,10 @@ async fn main() {
             //     next_record_at = Instant::now().add(Duration::from_secs(4));
             //     println!("inside a------------------------");
             // }
-            // _ =b() =>{
-            //     println!("inside b------------------------");
-            // }
         }
     }
 }
-
+ 
 async fn a() {
     println!("into a------------------------");
     tokio::time::sleep(Duration::from_secs(5)).await;
